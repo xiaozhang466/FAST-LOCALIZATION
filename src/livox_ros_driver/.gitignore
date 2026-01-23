@@ -1,6 +1,7 @@
 
 # ignore dir or file
-CMakeLists.txt
+# Only ignore CMakeLists.txt in root, not in subdirectories
+/CMakeLists.txt
 livox_ros_driver/Livox-SDK
 #whitelist
 
