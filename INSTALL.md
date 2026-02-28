@@ -69,6 +69,7 @@ sudo apt-get install -y \
     libpcl-dev \
     libboost-all-dev \
     libapr1-dev \
+    libasio-dev \
     can-utils
 ```
 
