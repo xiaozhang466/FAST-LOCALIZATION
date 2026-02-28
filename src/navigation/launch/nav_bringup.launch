@@ -5,7 +5,7 @@
   <arg name="rviz" default="true"/>
   <arg name="rviz_config" default="$(find navigation)/config/nav.rviz"/>
   <arg name="rviz_name" default="rviz_nav"/>
-  <arg name="enable_obstacle_avoidance" default="true"/>
+  <arg name="enable_obstacle_avoidance" default="false"/>
   <arg name="enable_chassis" default="true"/>
   <arg name="chassis_port" default="can0"/>
   <arg name="chassis_model" default="ranger_mini_v2"/>

@@ -52,9 +52,9 @@ local_costmap:
     inflation_radius: 0.25         # 障碍物膨胀半径 (米)，局部用较小值以便通过弯道和狭窄空间
     cost_scaling_factor: 5.0       # 代价衰减因子，越大则越快衰减，让边缘区域代价更低
   
-  # 静态层配置：局部代价地图不使用静态地图
+  # 静态层配置：加载静态地图让 DWA 感知墙壁和弯道
   static_layer:
-    enabled: false                 # 禁用静态层
+    enabled: true                  # 启用静态层
   
   # 障碍物层配置：处理实时传感器数据（此处暂时关闭，不避障）
   obstacle_layer:
