@@ -13,7 +13,8 @@
   <arg name="chassis_base_frame" default="base_link"/>
   <arg name="chassis_odom_topic" default="ranger_odom"/>
   <arg name="chassis_publish_odom_tf" default="false"/>
-  <arg name="cmd_vel_angular_deadband" default="0.1"/>
+  <arg name="enable_cmd_vel_filter" default="true"/>
+  <arg name="cmd_vel_angular_deadband" default="0.05"/>
   <arg name="cmd_vel_linear_deadband" default="0.0"/>
 
   <!-- Static TF: map -> camera_init, body -> base_link (identity) -->
@@ -57,12 +58,12 @@
     <param if="$(arg enable_obstacle_avoidance)" name="DWAPlannerROS/occdist_scale" value="0.02"/>
     <param unless="$(arg enable_obstacle_avoidance)" name="DWAPlannerROS/occdist_scale" value="0.0"/>
 
-    <!-- send raw cmd_vel for filtering -->
-    <remap from="/cmd_vel" to="/cmd_vel_raw"/>
+    <!-- send raw cmd_vel for filtering (only remap when filter is enabled) -->
+    <remap if="$(arg enable_cmd_vel_filter)" from="/cmd_vel" to="/cmd_vel_raw"/>
   </node>
 
   <!-- cmd_vel deadband filter -->
-  <node pkg="navigation" type="cmd_vel_filter.py" name="cmd_vel_filter" output="screen">
+  <node if="$(arg enable_cmd_vel_filter)" pkg="navigation" type="cmd_vel_filter.py" name="cmd_vel_filter" output="screen">
     <param name="input_topic" value="/cmd_vel_raw"/>
     <param name="output_topic" value="/cmd_vel"/>
     <param name="angular_deadband" value="$(arg cmd_vel_angular_deadband)"/>

@@ -126,7 +126,17 @@ source devel/setup.bash
 
 ### 5.1 底盘 CAN 总线配置（AgileX Ranger Mini）
 
-每次开机或重新插拔 CAN 设备后需执行：
+每次开机或重新插拔 CAN 设备后需执行（项目自带一键脚本）：
+
+```bash
+# 首次配置（加载内核模块 + 启动 CAN 接口 + 安装 can-utils）
+rosrun ugv_sdk setup_can2usb.bash
+
+# 日常启动（仅启动 CAN 接口，开机后执行一次即可）
+rosrun ranger_bringup bringup_can2usb.bash
+```
+
+或手动分步执行：
 
 ```bash
 # 加载 CAN 内核模块

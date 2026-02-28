@@ -39,7 +39,7 @@ DWAPlannerROS:
   # ---------- 加速度约束 ----------
   acc_lim_x: 1.5                 # 线加速度限制 (m/s²)
   acc_lim_y: 0.0                 # 侧向加速度限制 (差速底盘为 0)
-  acc_lim_theta: 0.8             # 角加速度限制，降低抖动
+  acc_lim_theta: 0.5             # 角加速度限制，降低抖动
   
   # ---------- 里程计话题 ----------
   odom_topic: /ranger_odom       # 使用底盘里程计，控制更平滑
@@ -50,9 +50,9 @@ DWAPlannerROS:
   latch_xy_goal_tolerance: false # 到达位置容差后是否锁定 (false = 继续调整朝向)
   
   # ---------- 轨迹模拟参数 ----------
-  sim_time: 1.0                  # 轨迹前向模拟时间 (秒)
-  vx_samples: 8                  # 线速度采样数量
-  vtheta_samples: 10             # 角速度采样数量
+  sim_time: 2.0                  # 轨迹前向模拟时间 (秒)，越长越平滑
+  vx_samples: 10                 # 线速度采样数量
+  vtheta_samples: 20             # 角速度采样数量，增大减少角速度跳变
   
   # ---------- 轨迹评分权重 ----------
   path_distance_bias: 50.0       # 放松贴路径，减少左右摆动
