@@ -80,11 +80,12 @@ generate_messages(
 )
 
 catkin_package(
-  CATKIN_DEPENDS geometry_msgs nav_msgs roscpp rospy std_msgs message_runtime
+  CATKIN_DEPENDS geometry_msgs nav_msgs roscpp rospy std_msgs message_runtime livox_ros_driver
   DEPENDS EIGEN3 PCL
   INCLUDE_DIRS
 )
 
 add_executable(fast_localization src/laserMapping.cpp include/ikd-Tree/ikd_Tree.cpp src/preprocess.cpp include/Scancontext/Scancontext.cpp)
+add_dependencies(fast_localization ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(fast_localization ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${PYTHON_LIBRARIES})
 target_include_directories(fast_localization PRIVATE ${PYTHON_INCLUDE_DIRS} ${OpenCV_LIBRARIES})
