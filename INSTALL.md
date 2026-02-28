@@ -23,7 +23,7 @@
 | 项目 | 要求 |
 |------|------|
 | **系统** | Ubuntu 20.04 |
-| **ROS** | ROS Noetic |
+| **ROS** | ROS Noetic（需安装 `ros-noetic-desktop-full`）|
 | **编译器** | GCC 支持 C++14 |
 | **CMake** | ≥ 2.8.3 |
 | **Python** | Python 3 |
@@ -40,6 +40,24 @@ cd fast_localization_ws
 ---
 
 ## 3. 安装依赖
+
+### 3.0 ROS Noetic 完整安装
+
+> 如果新设备尚未安装 ROS，或仅安装了 `ros-base`，请先安装完整版：
+
+```bash
+sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+sudo apt-get update
+sudo apt-get install -y ros-noetic-desktop-full
+```
+
+确认安装成功：
+
+```bash
+source /opt/ros/noetic/setup.bash
+rosversion -d   # 应输出 noetic
+```
 
 ### 3.1 系统依赖
 
