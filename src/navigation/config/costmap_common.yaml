@@ -7,7 +7,7 @@
 global_costmap:
   global_frame: map                # 全局坐标系名称
   robot_base_frame: base_link      # 机器人底盘坐标系名称
-  transform_tolerance: 0.5         # TF 变换的时间容忍度 (秒)
+  transform_tolerance: 0.2         # TF 变换的时间容忍度 (秒)，允许的最大延迟
   update_frequency: 5.0            # 代价地图更新频率 (Hz)
   publish_frequency: 2.0           # 代价地图发布频率 (Hz)
   resolution: 0.05                 # 栅格分辨率 (米/格)，5cm 精度
@@ -35,7 +35,7 @@ global_costmap:
 local_costmap:
   global_frame: map                # 全局坐标系名称
   robot_base_frame: base_link      # 机器人底盘坐标系名称
-  transform_tolerance: 0.5         # TF 变换的时间容忍度 (秒)
+  transform_tolerance: 0.2         # TF 变换的时间容忍度 (秒)
   update_frequency: 10.0           # 代价地图更新频率 (Hz)，局部需要更高频率
   publish_frequency: 10.0          # 代价地图发布频率 (Hz)
   rolling_window: true             # 启用滚动窗口模式，地图跟随机器人移动
@@ -49,12 +49,12 @@ local_costmap:
   
   # 膨胀层配置
   inflation_layer:
-    inflation_radius: 0.25         # 障碍物膨胀半径 (米)，局部用较小值以便通过弯道和狭窄空间
-    cost_scaling_factor: 5.0       # 代价衰减因子，越大则越快衰减，让边缘区域代价更低
+    inflation_radius: 0.35         # 障碍物膨胀半径 (米)，局部使用较小值以便通过狭窄空间
+    cost_scaling_factor: 3.0       # 代价衰减因子
   
-  # 静态层配置：加载静态地图让 DWA 感知墙壁和弯道
+  # 静态层配置：局部代价地图不使用静态地图
   static_layer:
-    enabled: true                  # 启用静态层
+    enabled: false                 # 禁用静态层
   
   # 障碍物层配置：处理实时传感器数据（此处暂时关闭，不避障）
   obstacle_layer:
@@ -70,7 +70,6 @@ local_costmap:
     registered_cloud:
       data_type: PointCloud2       # 数据类型：点云
       topic: /cloud_registered     # 订阅的话题：FAST-LOCALIZATION 输出的配准点云
-      sensor_frame: base_link      # 传感器坐标系，避免解析到 (0,0)
       marking: true                # 用于标记障碍物
       clearing: true               # 用于清除障碍物（射线追踪）
       expected_update_rate: 0.0    # 期望更新率，0 表示不检查

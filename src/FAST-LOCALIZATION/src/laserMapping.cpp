@@ -393,49 +393,10 @@ void imu_cbk(const sensor_msgs::Imu::ConstPtr &msg_in)
 
 double lidar_mean_scantime = 0.0;
 int    scan_num = 0;
-// Maximum number of lidar frames allowed to accumulate in the buffer.
-// When the buffer exceeds this limit, old frames are dropped to maintain
-// real-time performance and prevent growing latency.
-// We keep a small margin (3 frames = 0.3s at 10Hz) to avoid aggressive dropping.
-static const size_t LIDAR_BUFFER_MAX_SIZE = 3;
-
 bool sync_packages(MeasureGroup &meas)
 {
     if (lidar_buffer.empty() || imu_buffer.empty()) {
         return false;
-    }
-
-    /*** Drop old lidar frames if buffer is too large to keep latency low ***/
-    if (!lidar_pushed && lidar_buffer.size() > LIDAR_BUFFER_MAX_SIZE)
-    {
-        int drop_count = lidar_buffer.size() - LIDAR_BUFFER_MAX_SIZE;
-        for (int i = 0; i < drop_count; i++)
-        {
-            lidar_buffer.pop_front();
-            time_buffer.pop_front();
-        }
-
-        // Also trim stale IMU data to prevent excessively long pre-integration.
-        // Keep IMU data from 0.2s before the new earliest lidar frame for smooth
-        // integration start. This prevents the ImuProcess::Process() from trying
-        // to integrate over the entire dropped period (which could cause drift).
-        double new_earliest_lidar_time = time_buffer.front();
-        int imu_drop_count = 0;
-        while (imu_buffer.size() > 1 &&
-               imu_buffer.front()->header.stamp.toSec() < new_earliest_lidar_time - 0.2)
-        {
-            imu_buffer.pop_front();
-            imu_drop_count++;
-        }
-
-        ROS_WARN("Dropped %d lidar frames and %d IMU samples to reduce latency (lidar buf: %lu, imu buf: %lu)",
-                 drop_count, imu_drop_count, lidar_buffer.size(), imu_buffer.size());
-
-        // Reset IMU processor's last_lidar_end_time_ so it won't try to
-        // integrate from the old (now-dropped) timestamp.
-        // The next Process() call will treat the remaining IMU data with
-        // normal dt intervals (head-to-tail), avoiding any huge time jumps.
-        p_imu->reset_last_lidar_end_time();
     }
 
     /*** push a lidar scan ***/
@@ -653,7 +614,7 @@ void publish_odometry(const ros::Publisher & pubOdomAftMapped)
 {
     odomAftMapped.header.frame_id = "camera_init";
     odomAftMapped.child_frame_id = "body";
-    odomAftMapped.header.stamp = ros::Time::now(); // Use current time for navigation compatibility
+    odomAftMapped.header.stamp = ros::Time().fromSec(lidar_end_time);// ros::Time().fromSec(lidar_end_time);
     set_posestamp(odomAftMapped.pose);
     pubOdomAftMapped.publish(odomAftMapped);
     auto P = kf.get_P();
@@ -685,7 +646,7 @@ void publish_odometry(const ros::Publisher & pubOdomAftMapped)
 void publish_path(const ros::Publisher pubPath)
 {
     set_posestamp(msg_body_pose);
-    msg_body_pose.header.stamp = ros::Time::now(); // Use current time for consistency
+    msg_body_pose.header.stamp = ros::Time().fromSec(lidar_end_time);
     msg_body_pose.header.frame_id = "camera_init";
 
     /*** if path is too large, the rvis will crash ***/

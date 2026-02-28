@@ -9,6 +9,5 @@ local_costmap:
 
   # 图层插件列表 (按顺序叠加)
   plugins:
-    - {name: static_layer, type: "costmap_2d::StaticLayer"}
     - {name: obstacle_layer, type: "costmap_2d::ObstacleLayer"}
     - {name: inflation_layer, type: "costmap_2d::InflationLayer"}
