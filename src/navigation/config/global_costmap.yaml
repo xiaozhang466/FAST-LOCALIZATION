@@ -1,0 +1,16 @@
+# ============================================================================
+# 全局代价地图插件配置文件
+# 定义全局代价地图的图层插件及其加载顺序
+# ============================================================================
+
+global_costmap:
+  static_map: true                 # 使用静态地图 (由 map_server 提供)
+  rolling_window: false            # 不使用滚动窗口，覆盖整个静态地图范围
+  track_unknown_space: true        # 跟踪未知区域，未探索区域标记为未知
+  
+  # 图层插件列表 (按顺序叠加，后面的层会覆盖前面的层)
+  plugins:
+    # 1. 静态层：加载预先构建的 2D 栅格地图 (nav_map.pgm)
+    - {name: static_layer,   type: "costmap_2d::StaticLayer"}
+    # 2. 膨胀层：将障碍物向外扩展，确保机器人安全通过
+    - {name: inflation_layer, type: "costmap_2d::InflationLayer"}

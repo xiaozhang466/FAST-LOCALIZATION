@@ -1,0 +1,76 @@
+# ============================================================================
+# 代价地图通用参数配置文件
+# 包含全局代价地图和局部代价地图的详细参数设置
+# ============================================================================
+
+# ============================ 全局代价地图配置 ============================
+global_costmap:
+  global_frame: map                # 全局坐标系名称
+  robot_base_frame: base_link      # 机器人底盘坐标系名称
+  transform_tolerance: 0.2         # TF 变换的时间容忍度 (秒)，允许的最大延迟
+  update_frequency: 5.0            # 代价地图更新频率 (Hz)
+  publish_frequency: 2.0           # 代价地图发布频率 (Hz)
+  resolution: 0.05                 # 栅格分辨率 (米/格)，5cm 精度
+  
+  # 机器人足迹定义 (矩形: 长70cm × 宽50cm)
+  # 四个顶点坐标：左后、右后、右前、左前
+  footprint: [[-0.35, -0.25], [0.35, -0.25], [0.35, 0.25], [-0.35, 0.25]]
+  footprint_padding: 0.02          # 足迹额外膨胀边距 (米)，安全余量
+  
+  # 膨胀层配置：将障碍物向外扩展，确保机器人安全通过
+  inflation_layer:
+    inflation_radius: 0.6          # 障碍物膨胀半径 (米)，60cm
+    cost_scaling_factor: 3.0       # 代价衰减因子，越大则代价衰减越快
+  
+  # 静态层配置：加载 map_server 提供的静态地图
+  static_layer:
+    enabled: true                  # 启用静态层
+  
+  # 障碍物层配置
+  # 注意：全局代价地图禁用障碍物层，避免实时点云把整张地图标记为障碍
+  obstacle_layer:
+    enabled: false                 # 禁用障碍物层
+
+# ============================ 局部代价地图配置 ============================
+local_costmap:
+  global_frame: map                # 全局坐标系名称
+  robot_base_frame: base_link      # 机器人底盘坐标系名称
+  transform_tolerance: 0.2         # TF 变换的时间容忍度 (秒)
+  update_frequency: 10.0           # 代价地图更新频率 (Hz)，局部需要更高频率
+  publish_frequency: 10.0          # 代价地图发布频率 (Hz)
+  rolling_window: true             # 启用滚动窗口模式，地图跟随机器人移动
+  resolution: 0.05                 # 栅格分辨率 (米/格)，5cm 精度
+  width: 8.0                      # 滚动窗口宽度 (米)
+  height: 8.0                     # 滚动窗口高度 (米)
+  
+  # 机器人足迹定义 (与全局代价地图一致)
+  footprint: [[-0.35, -0.25], [0.35, -0.25], [0.35, 0.25], [-0.35, 0.25]]
+  footprint_padding: 0.02          # 足迹额外膨胀边距 (米)
+  
+  # 膨胀层配置
+  inflation_layer:
+    inflation_radius: 0.35         # 障碍物膨胀半径 (米)，局部使用较小值以便通过狭窄空间
+    cost_scaling_factor: 3.0       # 代价衰减因子
+  
+  # 静态层配置：局部代价地图不使用静态地图
+  static_layer:
+    enabled: false                 # 禁用静态层
+  
+  # 障碍物层配置：处理实时传感器数据（此处暂时关闭，不避障）
+  obstacle_layer:
+    enabled: false                 # 暂时关闭障碍物层
+    max_obstacle_height: 0.6       # 障碍物最大高度 (米)，高于此值的点被忽略
+    min_obstacle_height: -0.5      # 障碍物最小高度 (米)，低于此值的点被忽略（如地面）
+    obstacle_range: 6.0            # 障碍物检测范围 (米)，超出此范围的障碍不标记
+    raytrace_range: 8.0            # 射线追踪清除范围 (米)，用于清除已消失的障碍
+    combination_method: 1          # 多源数据融合方式：1=取最大值
+    
+    # 传感器数据源配置
+    observation_sources: registered_cloud  # 数据源名称
+    registered_cloud:
+      data_type: PointCloud2       # 数据类型：点云
+      topic: /cloud_registered     # 订阅的话题：FAST-LOCALIZATION 输出的配准点云
+      marking: true                # 用于标记障碍物
+      clearing: true               # 用于清除障碍物（射线追踪）
+      expected_update_rate: 0.0    # 期望更新率，0 表示不检查
+      inf_is_valid: true           # 无穷大距离值是否有效

@@ -87,6 +87,7 @@ mutex mtx_buffer;
 condition_variable sig_buffer;
 
 int localization_mode;
+std::vector<double> initial_pose_manual;
 string root_dir = ROOT_DIR;
 string map_file_path, lid_topic, imu_topic;
 double res_mean_last = 0.05, total_residual = 0.0;
@@ -140,6 +141,7 @@ bool global_update = false;
 
 std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>> position_map;
 std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>> pose_map;
+int num_map_frames = 0;  // Number of map frames loaded from pcd files
 
 std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>> position_init;
 std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>> pose_init;
@@ -800,6 +802,7 @@ void load_file(ros::Publisher& global_map_pub)
         count++;
     }
     pose_file.close();
+    num_map_frames = count;  // Store the number of map frames
 
 }
 
@@ -820,6 +823,46 @@ void global_localization()
         // 重定位结果
         std::vector<int> init_ids;
         std::vector<Eigen::Matrix4d, Eigen::aligned_allocator<Eigen::Matrix4d>> init_poses;
+
+        // Manual Initialization Mode
+        if (localization_mode == 1)
+        {
+            if (initial_pose_manual.size() == 6)
+            {
+                double x = initial_pose_manual[0];
+                double y = initial_pose_manual[1];
+                double z = initial_pose_manual[2];
+                double roll = initial_pose_manual[3];
+                double pitch = initial_pose_manual[4];
+                double yaw = initial_pose_manual[5];
+
+                Eigen::AngleAxisd rollAngle(Eigen::AngleAxisd(roll, Eigen::Vector3d::UnitX()));
+                Eigen::AngleAxisd pitchAngle(Eigen::AngleAxisd(pitch, Eigen::Vector3d::UnitY()));
+                Eigen::AngleAxisd yawAngle(Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()));
+                Eigen::Quaterniond q = yawAngle * pitchAngle * rollAngle;
+                Eigen::Matrix3d R = q.matrix();
+                Eigen::Vector3d T_vec(x, y, z);
+
+                Eigen::Matrix4d T = Eigen::Matrix4d::Identity();
+                T.block<3, 3>(0, 0) = R;
+                T.block<3, 1>(0, 3) = T_vec;
+
+                // Push twice to satisfy the (init_check < 2) condition immediately or handle logic downstream
+                init_poses.push_back(T);
+                init_ids.push_back(0); // Dummy ID
+                init_poses.push_back(T);
+                init_ids.push_back(0);
+
+                init_check = 2; // Finish initialization
+                ROS_INFO("Manual Initialization: x=%.3f, y=%.3f, z=%.3f, r=%.3f, p=%.3f, y=%.3f", x, y, z, roll, pitch, yaw);
+            }
+            else
+            {
+                ROS_WARN("Manual initialization failed: pose_init parameter size is %lu, expected 6", initial_pose_manual.size());
+                localization_mode = 2; // Fallback to auto
+            }
+        }
+
         while (init_check < 2)
         {
             std::unique_lock<std::mutex> lock_init_feats(init_feats_down_body_mutex);
@@ -843,9 +886,11 @@ void global_localization()
                 int localization_id = scManager.detectLoopClosureID().first;
                 float yaw_init = scManager.detectLoopClosureID().second;
 
-                if (localization_id == -1)
+                // Check if localization_id is valid (within map frame range)
+                if (localization_id == -1 || localization_id >= num_map_frames)
                 {
                     init_check = 0;
+                    ROS_WARN("Invalid localization_id: %d (map has %d frames)", localization_id, num_map_frames);
                     continue;
                 }
 
@@ -932,6 +977,7 @@ int main(int argc, char** argv)
 
     nh.param<bool>("publish/path_en",path_en, true);
     nh.param<int>("common/localization_mode", localization_mode, 1);
+    nh.param<vector<double>>("common/pose_init", initial_pose_manual, vector<double>());
     nh.param<bool>("publish/scan_publish_en",scan_pub_en, true);
     nh.param<bool>("publish/dense_publish_en",dense_pub_en, true);
     nh.param<bool>("publish/scan_bodyframe_pub_en",scan_body_pub_en, true);
@@ -1057,29 +1103,45 @@ int main(int argc, char** argv)
             std::unique_lock<std::mutex> lock_state(global_localization_finish_state_mutex);
             if (global_localization_finish && !global_update)
             {
-                int init_id = init_result.first;
-                Eigen::Vector3d init_time_p = position_init[init_id];
-                Eigen::Quaterniond init_time_q = pose_init[init_id];
+                if (localization_mode == 2)
+                {
+                    int init_id = init_result.first;
+                    Eigen::Vector3d init_time_p = position_init[init_id];
+                    Eigen::Quaterniond init_time_q = pose_init[init_id];
 
-                Eigen::Matrix4d T_odom_init_time = Eigen::Matrix4d::Identity();
-                T_odom_init_time.block<3, 3>(0, 0) = init_time_q.toRotationMatrix();
-                T_odom_init_time.block<3, 1>(0, 3) = init_time_p;
+                    Eigen::Matrix4d T_odom_init_time = Eigen::Matrix4d::Identity();
+                    T_odom_init_time.block<3, 3>(0, 0) = init_time_q.toRotationMatrix();
+                    T_odom_init_time.block<3, 1>(0, 3) = init_time_p;
 
-                Eigen::Matrix4d T_odom_current = Eigen::Matrix4d::Identity();
-                T_odom_current.block<3, 3>(0, 0) = state_point.rot.toRotationMatrix();
-                T_odom_current.block<3, 1>(0, 3) = state_point.pos;
+                    Eigen::Matrix4d T_odom_current = Eigen::Matrix4d::Identity();
+                    T_odom_current.block<3, 3>(0, 0) = state_point.rot.toRotationMatrix();
+                    T_odom_current.block<3, 1>(0, 3) = state_point.pos;
 
-                Eigen::Matrix4d T_map_init_time = init_result.second;
+                    Eigen::Matrix4d T_map_init_time = init_result.second;
 
-                Eigen::Matrix4d T_map_current = T_map_init_time * T_odom_init_time.inverse() * T_odom_current;
+                    Eigen::Matrix4d T_map_current = T_map_init_time * T_odom_init_time.inverse() * T_odom_current;
 
-                state_ikfom global_state = state_point;
-                global_state.pos = T_map_current.block<3, 1>(0, 3);
-                global_state.rot = T_map_current.block<3, 3>(0, 0);
-                kf.change_x(global_state);
-                state_point = kf.get_x();
-                ikdtree = std::move(ikdtree_global);
-                global_update = true;
+                    state_ikfom global_state = state_point;
+                    global_state.pos = T_map_current.block<3, 1>(0, 3);
+                    global_state.rot = T_map_current.block<3, 3>(0, 0);
+                    kf.change_x(global_state);
+                    state_point = kf.get_x();
+                    ikdtree = std::move(ikdtree_global);
+                    global_update = true;
+                }
+                else if (localization_mode == 1)
+                {
+                    // Manual mode: The pose in init_result is already the target pose
+                    Eigen::Matrix4d T_map_current = init_result.second;
+                    
+                    state_ikfom global_state = state_point;
+                    global_state.pos = T_map_current.block<3, 1>(0, 3);
+                    global_state.rot = T_map_current.block<3, 3>(0, 0);
+                    kf.change_x(global_state);
+                    state_point = kf.get_x();
+                    ikdtree = std::move(ikdtree_global);
+                    global_update = true; 
+                }
             }
             lock_state.unlock();
 
