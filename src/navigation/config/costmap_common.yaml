@@ -49,8 +49,8 @@ local_costmap:
   
   # 膨胀层配置
   inflation_layer:
-    inflation_radius: 0.35         # 障碍物膨胀半径 (米)，局部使用较小值以便通过狭窄空间
-    cost_scaling_factor: 3.0       # 代价衰减因子
+    inflation_radius: 0.25         # 障碍物膨胀半径 (米)，局部用较小值以便通过弯道和狭窄空间
+    cost_scaling_factor: 5.0       # 代价衰减因子，越大则越快衰减，让边缘区域代价更低
   
   # 静态层配置：局部代价地图不使用静态地图
   static_layer:
@@ -70,6 +70,7 @@ local_costmap:
     registered_cloud:
       data_type: PointCloud2       # 数据类型：点云
       topic: /cloud_registered     # 订阅的话题：FAST-LOCALIZATION 输出的配准点云
+      sensor_frame: base_link      # 传感器坐标系，避免解析到 (0,0)
       marking: true                # 用于标记障碍物
       clearing: true               # 用于清除障碍物（射线追踪）
       expected_update_rate: 0.0    # 期望更新率，0 表示不检查

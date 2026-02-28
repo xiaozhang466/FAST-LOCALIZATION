@@ -24,7 +24,7 @@ class CmdVelFilter:
 
         # Rate limiter: max change per cycle (at 10Hz control freq)
         self.max_linear_acc = rospy.get_param("~max_linear_acc", 0.15)   # m/s per cycle
-        self.max_angular_acc = rospy.get_param("~max_angular_acc", 0.08)  # rad/s per cycle
+        self.max_angular_acc = rospy.get_param("~max_angular_acc", 0.15)  # rad/s per cycle
 
         # Watchdog timeout
         self.timeout = rospy.get_param("~timeout", 0.5)
