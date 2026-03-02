@@ -10,6 +10,7 @@
 #include "ranger_base/ranger_messenger.hpp"
 
 #include <cmath>
+#include <limits>
 
 #include <ros/ros.h>
 
@@ -87,15 +88,21 @@ void RangerROSMessenger::LoadParameters() {
   nh_->param<std::string>("odom_topic_name", odom_topic_name_,
                           std::string("odom"));
   nh_->param<bool>("publish_odom_tf", publish_odom_tf_, false);
+  nh_->param<double>("spin_switch_linear_threshold",
+                     spin_switch_linear_threshold_, 0.05);
+  nh_->param<double>("spin_switch_angular_threshold",
+                     spin_switch_angular_threshold_, 0.15);
 
   ROS_INFO(
       "Successfully loaded the following parameters: \n port_name: %s\n "
       "robot_model: %s\n odom_frame: %s\n base_frame: %s\n "
       "update_rate: %d\n odom_topic_name: %s\n "
-      "publish_odom_tf: %d\n",
+      "publish_odom_tf: %d\n spin_switch_linear_threshold: %.3f\n "
+      "spin_switch_angular_threshold: %.3f\n",
       port_name_.c_str(), robot_model_.c_str(), odom_frame_.c_str(),
       base_frame_.c_str(), update_rate_, odom_topic_name_.c_str(),
-      publish_odom_tf_);
+      publish_odom_tf_, spin_switch_linear_threshold_,
+      spin_switch_angular_threshold_);
 
   // load robot parameters
   if (robot_model_ == "ranger_mini_v1") {
@@ -461,6 +468,8 @@ void RangerROSMessenger::TwistCmdCallback(
     const geometry_msgs::Twist::ConstPtr& msg) {
   double steer_cmd;
   double radius;
+  const double abs_linear_x = std::abs(msg->linear.x);
+  const double abs_angular_z = std::abs(msg->angular.z);
 
   // analyze Twist msg and switch motion_mode
   // check for parking mode, only applicable to RangerMiniV2
@@ -476,8 +485,11 @@ void RangerROSMessenger::TwistCmdCallback(
     }
   } else {
     steer_cmd = CalculateSteeringAngle(*msg, radius);
+    const bool prefer_spinning =
+        abs_linear_x <= spin_switch_linear_threshold_ &&
+        abs_angular_z >= spin_switch_angular_threshold_;
     // Use minimum turn radius to switch between dual ackerman and spinning mode
-    if (radius < robot_params_.min_turn_radius) {
+    if (prefer_spinning || radius < robot_params_.min_turn_radius) {
       motion_mode_ = MotionState::MOTION_MODE_SPINNING;
       robot_->SetMotionMode(MotionState::MOTION_MODE_SPINNING);
     } else {
@@ -592,8 +604,19 @@ void RangerROSMessenger::LightCmdCallback(
 
 double RangerROSMessenger::CalculateSteeringAngle(geometry_msgs::Twist msg,
                                                   double& radius) {
+  constexpr double kEpsilon = 1e-6;
   double linear = std::abs(msg.linear.x);
   double angular = std::abs(msg.angular.z);
+
+  // Avoid NaN when linear/angle are near zero.
+  if (angular < kEpsilon) {
+    radius = std::numeric_limits<double>::infinity();
+    return 0.0;
+  }
+  if (linear < kEpsilon) {
+    radius = 0.0;
+    return 0.0;
+  }
 
   // Circular motion
   radius = linear / angular;
