@@ -19,7 +19,7 @@ global_costmap:
   
   # 膨胀层配置：将障碍物向外扩展，确保机器人安全通过
   inflation_layer:
-    inflation_radius: 0.6          # 障碍物膨胀半径 (米)，60cm
+    inflation_radius: 0.2          # 障碍物膨胀半径 (米)，60cm
     cost_scaling_factor: 3.0       # 代价衰减因子，越大则代价衰减越快
   
   # 静态层配置：加载 map_server 提供的静态地图
