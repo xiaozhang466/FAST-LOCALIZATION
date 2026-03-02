@@ -21,6 +21,7 @@
   <depend>nav_core</depend>
   <depend>navfn</depend>
   <depend>dwa_local_planner</depend>
+  <exec_depend>teb_local_planner</exec_depend>
 
   <export/>
 </package>

@@ -1,0 +1,61 @@
+TebLocalPlannerROS:
+  odom_topic: /ranger_odom
+  map_frame: map
+
+  # Trajectory timing
+  teb_autosize: true
+  dt_ref: 0.3
+  dt_hysteresis: 0.1
+  max_samples: 500
+  global_plan_overwrite_orientation: true
+  allow_init_with_backwards_motion: true
+  max_global_plan_lookahead_dist: 3.0
+  force_reinit_new_goal_dist: 1.0
+  feasibility_check_no_poses: 5
+  publish_feedback: false
+
+  # Robot kinematics
+  max_vel_x: 0.8
+  max_vel_x_backwards: 0.3
+  max_vel_theta: 1.0
+  acc_lim_x: 1.5
+  acc_lim_theta: 2.0
+  min_turning_radius: 0.0
+  wheelbase: 0.494
+  cmd_angle_instead_rotvel: false
+
+  footprint_model:
+    type: "polygon"
+    vertices: [[-0.35, -0.25], [0.35, -0.25], [0.35, 0.25], [-0.35, 0.25]]
+
+  # Goal tolerance
+  xy_goal_tolerance: 0.2
+  yaw_goal_tolerance: 0.35
+  free_goal_vel: false
+  complete_global_plan: true
+
+  # Obstacle handling
+  min_obstacle_dist: 0.2
+  inflation_dist: 0.35
+  include_costmap_obstacles: true
+  costmap_obstacles_behind_robot_dist: 1.0
+  obstacle_poses_affected: 30
+
+  # Optimization
+  no_inner_iterations: 5
+  no_outer_iterations: 4
+  optimization_activate: true
+  optimization_verbose: false
+  penalty_epsilon: 0.1
+  weight_max_vel_x: 2.0
+  weight_max_vel_theta: 1.0
+  weight_acc_lim_x: 1.0
+  weight_acc_lim_theta: 1.0
+  weight_kinematics_nh: 1000.0
+  weight_kinematics_forward_drive: 0.2
+  weight_kinematics_turning_radius: 1.0
+  weight_optimaltime: 1.0
+  weight_obstacle: 50.0
+
+  # Use a single class first for stable behavior and easier tuning
+  enable_homotopy_class_planning: false

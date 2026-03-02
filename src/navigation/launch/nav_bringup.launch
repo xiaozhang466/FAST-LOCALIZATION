@@ -5,6 +5,7 @@
   <arg name="rviz" default="true"/>
   <arg name="rviz_config" default="$(find navigation)/config/nav.rviz"/>
   <arg name="rviz_name" default="rviz_nav"/>
+  <arg name="use_teb" default="true"/>
   <arg name="enable_obstacle_avoidance" default="false"/>
   <arg name="enable_chassis" default="true"/>
   <arg name="chassis_port" default="can0"/>
@@ -48,6 +49,10 @@
     <rosparam file="$(find fast_localization)/../navigation/config/costmap_common.yaml" command="load"/>
     <rosparam file="$(find fast_localization)/../navigation/config/global_costmap.yaml" command="load"/>
     <rosparam file="$(find fast_localization)/../navigation/config/move_base_params.yaml" command="load"/>
+    <rosparam if="$(arg use_teb)" file="$(find fast_localization)/../navigation/config/teb_local_planner_params.yaml" command="load"/>
+
+    <param if="$(arg use_teb)" name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS"/>
+    <param unless="$(arg use_teb)" name="base_local_planner" value="dwa_local_planner/DWAPlannerROS"/>
 
     <rosparam if="$(arg enable_obstacle_avoidance)" file="$(find fast_localization)/../navigation/config/local_costmap_obstacle.yaml" command="load"/>
     <rosparam unless="$(arg enable_obstacle_avoidance)" file="$(find fast_localization)/../navigation/config/local_costmap_no_obstacle.yaml" command="load"/>
