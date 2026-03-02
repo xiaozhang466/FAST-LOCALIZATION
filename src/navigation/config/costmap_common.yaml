@@ -69,7 +69,7 @@ local_costmap:
     observation_sources: registered_cloud  # 数据源名称
     registered_cloud:
       data_type: PointCloud2       # 数据类型：点云
-      topic: /cloud_registered     # 订阅的话题：FAST-LOCALIZATION 输出的配准点云
+      topic: /cloud_registered_body     # 订阅的话题：FAST-LOCALIZATION 输出的配准点云
       marking: true                # 用于标记障碍物
       clearing: true               # 用于清除障碍物（射线追踪）
       expected_update_rate: 0.0    # 期望更新率，0 表示不检查
