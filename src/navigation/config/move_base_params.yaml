@@ -28,13 +28,14 @@ DWAPlannerROS:
   
   # ---------- 线速度约束 (m/s) ----------
   max_vel_x: 0.8                 # 最大前进速度
-  min_vel_x: 0.10                # 最小前进速度，减少停-转-停抖动
+  min_vel_x: 0.0                 # 允许停车和原地旋转
+  min_vel_trans: 0.0             # 最小平移速度，0 允许纯原地旋转
   max_vel_y: 0.0                 # 最大侧向速度 (差速底盘为 0)
   min_vel_y: 0.0                 # 最小侧向速度
   
   # ---------- 角速度约束 (rad/s) ----------
   max_vel_theta: 0.6             # 最大角速度，降低抖动
-  min_vel_theta: -0.6            # 最小角速度
+  min_vel_theta: 0.3             # 最小角速度绝对值（需为非负），保证可执行原地转向
   
   # ---------- 加速度约束 ----------
   acc_lim_x: 1.5                 # 线加速度限制 (m/s²)
@@ -47,12 +48,12 @@ DWAPlannerROS:
   # ---------- 目标到达容差 ----------
   yaw_goal_tolerance: 0.4        # 朝向容差放宽，减少原地微调
   xy_goal_tolerance: 0.2         # 位置容差 (米)，20cm
-  latch_xy_goal_tolerance: false # 到达位置容差后是否锁定 (false = 继续调整朝向)
+  latch_xy_goal_tolerance: true  # 到达位置容差后锁定，只调整朝向
   
   # ---------- 轨迹模拟参数 ----------
   sim_time: 2.0                  # 轨迹前向模拟时间 (秒)，越长越平滑
   vx_samples: 10                 # 线速度采样数量
-  vtheta_samples: 20             # 角速度采样数量，增大减少角速度跳变
+  vth_samples: 20                # 角速度采样数量（DWA 参数名）
   
   # ---------- 轨迹评分权重 ----------
   path_distance_bias: 50.0       # 放松贴路径，减少左右摆动
