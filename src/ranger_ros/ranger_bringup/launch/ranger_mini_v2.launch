@@ -8,6 +8,8 @@
     <arg name="update_rate" default="50" />
     <arg name="odom_topic_name" default="odom" />
     <arg name="publish_odom_tf" default="false" />
+    <arg name="spin_switch_linear_threshold" default="0.05" />
+    <arg name="spin_switch_angular_threshold" default="0.15" />
 
     <include file="$(find ranger_base)/launch/include/ranger_robot_base.launch">
         <arg name="port_name" value="$(arg port_name)"/>
@@ -17,5 +19,7 @@
         <arg name="update_rate" value="$(arg update_rate)" />
         <arg name="odom_topic_name" value="$(arg odom_topic_name)" />
         <arg name="publish_odom_tf" value="$(arg publish_odom_tf)" />
+        <arg name="spin_switch_linear_threshold" value="$(arg spin_switch_linear_threshold)" />
+        <arg name="spin_switch_angular_threshold" value="$(arg spin_switch_angular_threshold)" />
     </include>
 </launch>
