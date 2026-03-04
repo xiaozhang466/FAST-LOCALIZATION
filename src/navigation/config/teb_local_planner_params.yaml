@@ -1,61 +1,108 @@
 TebLocalPlannerROS:
+  # 里程计输入话题（TEB 用它获取机器人当前速度和位姿增量）
   odom_topic: /ranger_odom
+  # 规划参考的全局坐标系（通常与全局代价地图 frame 一致）
   map_frame: map
 
-  # Trajectory timing
+  # ========================= 时间离散/轨迹初始化 =========================
+  # 自动调整轨迹时间分辨率（true 时会围绕 dt_ref 自适应增减轨迹点）
   teb_autosize: true
+  # 相邻轨迹位姿的目标时间间隔，单位秒（越小越细腻，但计算更重）
   dt_ref: 0.3
+  # 时间间隔滞回带，避免频繁增删轨迹点导致抖动
   dt_hysteresis: 0.1
+  # 轨迹最大采样点数量上限（防止异常情况下轨迹过长）
   max_samples: 500
+  # 用全局路径方向覆盖局部轨迹朝向（更贴全局路，但可能降低局部灵活性）
   global_plan_overwrite_orientation: true
+  # 允许以“倒车”方式初始化轨迹（目标在后方时更容易起步）
   allow_init_with_backwards_motion: true
+  # 从全局路径截取给 TEB 的前瞻长度，单位米（减小可提升局部响应）
   max_global_plan_lookahead_dist: 3.0
+  # 目标点变化超过该距离时强制重建 TEB 轨迹，单位米
   force_reinit_new_goal_dist: 1.0
+  # 可行性检查使用的前 N 个轨迹位姿数（主要检查碰撞/运动学可行）
   feasibility_check_no_poses: 5
+  # 是否发布 TEB 调试反馈话题（调参可开，常规运行可关）
   publish_feedback: false
 
-  # Robot kinematics
+  # ========================= 机器人运动学约束 =========================
+  # 最大前进线速度，m/s
   max_vel_x: 0.8
+  # 最大后退线速度，m/s（适当小于前进速度通常更稳）
   max_vel_x_backwards: 0.3
+  # 最大角速度，rad/s
   max_vel_theta: 1.0
+  # 线加速度限制，m/s^2（越小越平顺，越大越激进）
   acc_lim_x: 1.5
+  # 角加速度限制，rad/s^2
   acc_lim_theta: 2.0
+  # 最小转弯半径，m；差速/原地转向机器人通常设 0
   min_turning_radius: 0.0
+  # 轴距，m；仅在类汽车模型或使用转向角时更关键
   wheelbase: 0.494
+  # true 表示输出前轮转角命令；false 表示输出角速度（Twist.angular.z）
   cmd_angle_instead_rotvel: false
 
+  # ========================= 机器人外形模型 =========================
   footprint_model:
+    # 足迹模型类型：polygon/line/two_circles/circular 等
     type: "polygon"
+    # 多边形顶点（单位米，按 base_link 坐标系）
     vertices: [[-0.35, -0.25], [0.35, -0.25], [0.35, 0.25], [-0.35, 0.25]]
 
-  # Goal tolerance
+  # ========================= 到点判定 =========================
+  # 位置到达容差，m
   xy_goal_tolerance: 0.2
+  # 朝向到达容差，rad（0.35 rad 约 20 度）
   yaw_goal_tolerance: 0.35
+  # 到达目标后是否允许保留非零速度（false 表示必须刹停）
   free_goal_vel: false
+  # 是否尽量走完整条全局路径到终点（true 通常更保守）
   complete_global_plan: true
 
-  # Obstacle handling
+  # ========================= 障碍物约束 =========================
+  # 与障碍物的最小安全距离，m（增大更保守，减小更容易过窄路）
   min_obstacle_dist: 0.2
+  # 障碍影响范围，m（超出该距离后障碍代价快速减弱）
   inflation_dist: 0.35
+  # 是否将 costmap 障碍物作为 TEB 优化约束输入
   include_costmap_obstacles: true
+  # 机器人后方纳入障碍考虑的距离，m（倒车和原地转向相关）
   costmap_obstacles_behind_robot_dist: 1.0
+  # 单个障碍会影响的轨迹位姿数量（越大越“提前避障”）
   obstacle_poses_affected: 30
 
-  # Optimization
+  # ========================= 优化器参数/权重 =========================
+  # 每次外循环中的内层优化迭代次数（每轮细化强度）
   no_inner_iterations: 5
+  # 外层“重线性化+再优化”次数（整体收敛能力）
   no_outer_iterations: 4
+  # 是否开启优化（关闭后基本不具备 TEB 的核心能力）
   optimization_activate: true
+  # 是否打印详细优化日志（调参时可开启）
   optimization_verbose: false
+  # 软约束惩罚平滑项（避免硬拐点，常取小正数）
   penalty_epsilon: 0.1
+  # 速度上限约束权重（越大越不允许超速）
   weight_max_vel_x: 2.0
+  # 角速度上限约束权重
   weight_max_vel_theta: 1.0
+  # 线加速度上限约束权重
   weight_acc_lim_x: 1.0
+  # 角加速度上限约束权重
   weight_acc_lim_theta: 1.0
+  # 非完整约束（差速不可侧移）权重；大值可强约束运动学可行性
   weight_kinematics_nh: 1000.0
+  # 前进偏好权重（越大越抑制倒车，0 表示不偏好）
   weight_kinematics_forward_drive: 0.2
+  # 最小转弯半径约束权重（差速底盘设半径 0 时影响较小）
   weight_kinematics_turning_radius: 1.0
+  # 最短时间目标权重（越大越追求快到达）
   weight_optimaltime: 1.0
+  # 障碍物代价权重（越大越远离障碍）
   weight_obstacle: 50.0
 
-  # Use a single class first for stable behavior and easier tuning
+  # ========================= 同伦类路径 =========================
+  # 是否启用多同伦类并行规划（false 更稳定易调；true 可绕障更灵活但更复杂）
   enable_homotopy_class_planning: false

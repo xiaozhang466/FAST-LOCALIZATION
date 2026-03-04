@@ -14,7 +14,7 @@
   <arg name="chassis_base_frame" default="base_link"/>
   <arg name="chassis_odom_topic" default="ranger_odom"/>
   <arg name="chassis_publish_odom_tf" default="false"/>
-  <arg name="enable_cmd_vel_filter" default="true"/>
+  <arg name="enable_cmd_vel_filter" default="false"/>
   <arg name="cmd_vel_angular_deadband" default="0.05"/>
   <arg name="cmd_vel_linear_deadband" default="0.0"/>
 
