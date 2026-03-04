@@ -13,18 +13,24 @@
   <arg name="chassis_odom_frame" default="odom"/>
   <arg name="chassis_base_frame" default="base_link"/>
   <arg name="chassis_odom_topic" default="/ranger_odom"/>
-  <arg name="chassis_publish_odom_tf" default="false"/>
+  <arg name="chassis_publish_odom_tf" default="true"/>
+  <arg name="publish_body_to_base_tf" default="false"/>
+  <arg name="enable_map_odom_tf" default="true"/>
+  <arg name="global_odom_topic" default="/Odometry"/>
+  <arg name="map_odom_publish_rate" default="30.0"/>
+  <arg name="map_odom_timeout" default="0.5"/>
   <arg name="enable_cmd_vel_filter" default="false"/>
   <arg name="cmd_vel_angular_deadband" default="0.05"/>
   <arg name="cmd_vel_linear_deadband" default="0.0"/>
 
-  <!-- Static TF: map -> camera_init, body -> base_link (identity) -->
+  <!-- Static TF: map -> camera_init -->
   <group if="$(arg publish_static_tf)">
     <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_camera_init"
           args="0 0 0 0 0 0 map camera_init"/>
-    <node pkg="tf2_ros" type="static_transform_publisher" name="body_to_base_link"
-          args="0 0 0 0 0 0 body base_link"/>
   </group>
+  <!-- Optional legacy TF: body -> base_link (identity). Keep false when odom TF is enabled. -->
+  <node if="$(arg publish_body_to_base_tf)" pkg="tf2_ros" type="static_transform_publisher" name="body_to_base_link"
+        args="0 0 0 0 0 0 body base_link"/>
 
   <!-- Publish 2D nav map -->
   <node pkg="map_server" type="map_server" name="map_server"
@@ -43,6 +49,16 @@
       <arg name="publish_odom_tf" value="$(arg chassis_publish_odom_tf)"/>
     </include>
   </group>
+
+  <!-- Dynamic TF: map -> odom from global localization + wheel odometry -->
+  <node if="$(arg enable_map_odom_tf)" pkg="navigation" type="map_odom_broadcaster.py" name="map_odom_broadcaster" output="screen">
+    <param name="map_frame" value="map"/>
+    <param name="odom_frame" value="$(arg chassis_odom_frame)"/>
+    <param name="global_odom_topic" value="$(arg global_odom_topic)"/>
+    <param name="local_odom_topic" value="$(arg chassis_odom_topic)"/>
+    <param name="publish_rate" value="$(arg map_odom_publish_rate)"/>
+    <param name="msg_timeout" value="$(arg map_odom_timeout)"/>
+  </node>
 
   <!-- move_base with costmaps and planners -->
   <node pkg="move_base" type="move_base" name="move_base" output="screen">

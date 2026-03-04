@@ -1,8 +1,8 @@
 TebLocalPlannerROS:
   # 里程计输入话题（TEB 用它获取机器人当前速度和位姿增量）
   odom_topic: /ranger_odom
-  # 规划参考的全局坐标系（通常与全局代价地图 frame 一致）
-  map_frame: map
+  # 规划参考坐标系（与 local_costmap.global_frame 一致）
+  map_frame: odom
 
   # ========================= 时间离散/轨迹初始化 =========================
   # 自动调整轨迹时间分辨率（true 时会围绕 dt_ref 自适应增减轨迹点）

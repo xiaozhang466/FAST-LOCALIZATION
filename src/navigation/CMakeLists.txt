@@ -23,6 +23,8 @@ include_directories(
 )
 
 catkin_install_python(
-  PROGRAMS scripts/cmd_vel_filter.py
+  PROGRAMS
+    scripts/cmd_vel_filter.py
+    scripts/map_odom_broadcaster.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

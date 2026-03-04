@@ -33,7 +33,7 @@ global_costmap:
 
 # ============================ 局部代价地图配置 ============================
 local_costmap:
-  global_frame: map                # 全局坐标系名称
+  global_frame: odom               # 局部控制坐标系（使用连续平滑的里程计）
   robot_base_frame: base_link      # 机器人底盘坐标系名称
   transform_tolerance: 0.2         # TF 变换的时间容忍度 (秒)
   update_frequency: 10.0           # 代价地图更新频率 (Hz)，局部需要更高频率
