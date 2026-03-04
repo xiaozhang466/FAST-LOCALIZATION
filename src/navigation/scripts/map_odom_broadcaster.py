@@ -37,8 +37,9 @@ class MapOdomBroadcaster:
         self.odom_frame = rospy.get_param("~odom_frame", "odom")
         self.global_odom_topic = rospy.get_param("~global_odom_topic", "/Odometry")
         self.local_odom_topic = rospy.get_param("~local_odom_topic", "/ranger_odom")
-        self.publish_rate = float(rospy.get_param("~publish_rate", 30.0))
+        self.publish_rate = float(rospy.get_param("~publish_rate", 100.0))
         self.msg_timeout = float(rospy.get_param("~msg_timeout", 0.5))
+        self.time_offset = float(rospy.get_param("~time_offset", 0.03))
 
         self._lock = threading.Lock()
         self._global_odom = None
@@ -57,11 +58,12 @@ class MapOdomBroadcaster:
         self._timer = rospy.Timer(rospy.Duration(period), self._on_timer)
 
         rospy.loginfo(
-            "map_odom_broadcaster started: map_frame=%s odom_frame=%s global_odom=%s local_odom=%s",
+            "map_odom_broadcaster started: map_frame=%s odom_frame=%s global_odom=%s local_odom=%s time_offset=%.3f",
             self.map_frame,
             self.odom_frame,
             self.global_odom_topic,
             self.local_odom_topic,
+            self.time_offset,
         )
 
     def _global_odom_cb(self, msg: Odometry):
@@ -92,6 +94,18 @@ class MapOdomBroadcaster:
             )
             return
 
+        global_child = global_odom.child_frame_id.strip()
+        local_child = local_odom.child_frame_id.strip()
+        if global_child and local_child and global_child != local_child:
+            rospy.logwarn_throttle(
+                2.0,
+                "map_odom_broadcaster child frame mismatch: global=%s local=%s; "
+                "set same base frame for both odom sources",
+                global_child,
+                local_child,
+            )
+            return
+
         t_map_base = odom_msg_to_matrix(global_odom)
         t_odom_base = odom_msg_to_matrix(local_odom)
 
@@ -105,7 +119,7 @@ class MapOdomBroadcaster:
         quat = tft.quaternion_from_matrix(t_map_odom)
 
         tf_msg = TransformStamped()
-        tf_msg.header.stamp = now
+        tf_msg.header.stamp = now + rospy.Duration.from_sec(self.time_offset)
         tf_msg.header.frame_id = self.map_frame
         tf_msg.child_frame_id = self.odom_frame
         tf_msg.transform.translation.x = float(trans[0])
@@ -126,4 +140,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
