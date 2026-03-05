@@ -87,5 +87,5 @@ catkin_package(
 
 add_executable(fast_localization src/laserMapping.cpp include/ikd-Tree/ikd_Tree.cpp src/preprocess.cpp include/Scancontext/Scancontext.cpp)
 add_dependencies(fast_localization ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(fast_localization ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${PYTHON_LIBRARIES})
+target_link_libraries(fast_localization ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${PYTHON_LIBRARIES} usb-1.0)
 target_include_directories(fast_localization PRIVATE ${PYTHON_INCLUDE_DIRS} ${OpenCV_LIBRARIES})

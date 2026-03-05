@@ -251,6 +251,8 @@ roslaunch navigation nav_bringup.launch
 | **Livox AVIA** | `roslaunch fast_localization localization_avia.launch` |
 | **Ouster OS1-64** | `roslaunch fast_localization localization_ouster64.launch` |
 
+> 说明（LSLidar C16）：定位节点默认关闭 `camera_init -> body` TF 广播（避免与导航链冲突）。若仅做定位调试需要该 TF，可在启动时增加 `publish_tf:=true`。
+
 ### 7.3 各雷达驱动启动
 
 | 雷达类型 | 启动命令 |
