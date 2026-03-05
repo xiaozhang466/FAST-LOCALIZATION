@@ -13,12 +13,12 @@ TebLocalPlannerROS:
   dt_hysteresis: 0.1
   # 轨迹最大采样点数量上限（防止异常情况下轨迹过长）
   max_samples: 500
-  # 用全局路径方向覆盖局部轨迹朝向（更贴全局路，但可能降低局部灵活性）
-  global_plan_overwrite_orientation: true
+  # 不强制覆盖为全局路径朝向，减小由全局路径姿态噪声导致的来回修正
+  global_plan_overwrite_orientation: false
   # 允许以“倒车”方式初始化轨迹（目标在后方时更容易起步）
   allow_init_with_backwards_motion: false
-  # 从全局路径截取给 TEB 的前瞻长度，单位米（减小可提升局部响应）
-  max_global_plan_lookahead_dist: 1.5
+  # 从全局路径截取给 TEB 的前瞻长度，单位米（适当增大以提升平顺性）
+  max_global_plan_lookahead_dist: 2.5
   # 目标点变化超过该距离时强制重建 TEB 轨迹，单位米
   force_reinit_new_goal_dist: 1.0
   # 可行性检查使用的前 N 个轨迹位姿数（主要检查碰撞/运动学可行）
@@ -31,12 +31,12 @@ TebLocalPlannerROS:
   max_vel_x: 0.22
   # 最大后退线速度，m/s（适当小于前进速度通常更稳）
   max_vel_x_backwards: 0.2
-  # 最大角速度，rad/s（继续收紧，降低蛇形）
-  max_vel_theta: 0.30
+  # 最大角速度，rad/s（进一步收紧，抑制小幅左右摆）
+  max_vel_theta: 0.25
   # 线加速度限制，m/s^2（越小越平顺，越大越激进）
   acc_lim_x: 0.8
-  # 角加速度限制，rad/s^2（继续收紧，抑制左右来回修正）
-  acc_lim_theta: 0.35
+  # 角加速度限制，rad/s^2（进一步收紧，抑制角向抖动）
+  acc_lim_theta: 0.25
   # 最小转弯半径，m（增大，约束更平滑的曲率）
   min_turning_radius: 0.55
   # 轴距，m；仅在类汽车模型或使用转向角时更关键
@@ -94,12 +94,12 @@ TebLocalPlannerROS:
   weight_acc_lim_theta: 4.0
   # 非完整约束（差速不可侧移）权重；大值可强约束运动学可行性
   weight_kinematics_nh: 1000.0
-  # 前进偏好权重（越大越抑制倒车，0 表示不偏好）
-  weight_kinematics_forward_drive: 0.2
+  # 前进偏好权重（提高，减小不必要的姿态反复修正）
+  weight_kinematics_forward_drive: 1.0
   # 最小转弯半径约束权重（提高，降低急促左右摆）
   weight_kinematics_turning_radius: 60.0
-  # 最短时间目标权重（降低，优先平顺而非激进）
-  weight_optimaltime: 0.5
+  # 最短时间目标权重（继续降低，优先平顺）
+  weight_optimaltime: 0.3
   # 障碍物代价权重（越大越远离障碍）
   weight_obstacle: 50.0
 
