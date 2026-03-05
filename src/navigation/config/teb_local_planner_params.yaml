@@ -7,8 +7,8 @@ TebLocalPlannerROS:
   # ========================= 时间离散/轨迹初始化 =========================
   # 自动调整轨迹时间分辨率（true 时会围绕 dt_ref 自适应增减轨迹点）
   teb_autosize: true
-  # 相邻轨迹位姿的目标时间间隔，单位秒（越小越细腻，但计算更重）
-  dt_ref: 0.2
+  # 相邻轨迹位姿的目标时间间隔，单位秒（略增大以抑制高频抖动）
+  dt_ref: 0.25
   # 时间间隔滞回带，避免频繁增删轨迹点导致抖动
   dt_hysteresis: 0.1
   # 轨迹最大采样点数量上限（防止异常情况下轨迹过长）
@@ -27,18 +27,18 @@ TebLocalPlannerROS:
   publish_feedback: true
 
   # ========================= 机器人运动学约束 =========================
-  # 最大前进线速度，m/s
-  max_vel_x: 0.25
+  # 最大前进线速度，m/s（略降，降低耦合振荡）
+  max_vel_x: 0.22
   # 最大后退线速度，m/s（适当小于前进速度通常更稳）
   max_vel_x_backwards: 0.2
-  # 最大角速度，rad/s（收紧，降低角向摆动）
-  max_vel_theta: 0.40
+  # 最大角速度，rad/s（继续收紧，降低蛇形）
+  max_vel_theta: 0.30
   # 线加速度限制，m/s^2（越小越平顺，越大越激进）
   acc_lim_x: 0.8
-  # 角加速度限制，rad/s^2（收紧，降低角向激进度）
-  acc_lim_theta: 0.50
-  # 最小转弯半径，m；差速/原地转向机器人通常设 0
-  min_turning_radius: 0.48
+  # 角加速度限制，rad/s^2（继续收紧，抑制左右来回修正）
+  acc_lim_theta: 0.35
+  # 最小转弯半径，m（增大，约束更平滑的曲率）
+  min_turning_radius: 0.55
   # 轴距，m；仅在类汽车模型或使用转向角时更关键
   wheelbase: 0.494
   # true 表示输出前轮转角命令；false 表示输出角速度（Twist.angular.z）
@@ -86,20 +86,20 @@ TebLocalPlannerROS:
   penalty_epsilon: 0.1
   # 速度上限约束权重（越大越不允许超速）
   weight_max_vel_x: 2.0
-  # 角速度上限约束权重（提高，抑制角速度过大）
-  weight_max_vel_theta: 3.0
+  # 角速度上限约束权重（继续提高，抑制角速度过大）
+  weight_max_vel_theta: 5.0
   # 线加速度上限约束权重
   weight_acc_lim_x: 1.0
-  # 角加速度上限约束权重（提高，抑制角速度突变）
-  weight_acc_lim_theta: 2.5
+  # 角加速度上限约束权重（继续提高，抑制角速度突变）
+  weight_acc_lim_theta: 4.0
   # 非完整约束（差速不可侧移）权重；大值可强约束运动学可行性
   weight_kinematics_nh: 1000.0
   # 前进偏好权重（越大越抑制倒车，0 表示不偏好）
   weight_kinematics_forward_drive: 0.2
-  # 最小转弯半径约束权重（差速底盘设半径 0 时影响较小）
-  weight_kinematics_turning_radius: 30.0
-  # 最短时间目标权重（越大越追求快到达）
-  weight_optimaltime: 1.0
+  # 最小转弯半径约束权重（提高，降低急促左右摆）
+  weight_kinematics_turning_radius: 60.0
+  # 最短时间目标权重（降低，优先平顺而非激进）
+  weight_optimaltime: 0.5
   # 障碍物代价权重（越大越远离障碍）
   weight_obstacle: 50.0
 
