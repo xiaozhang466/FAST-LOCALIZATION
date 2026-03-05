@@ -24,7 +24,7 @@ TebLocalPlannerROS:
   # 可行性检查使用的前 N 个轨迹位姿数（主要检查碰撞/运动学可行）
   feasibility_check_no_poses: 5
   # 是否发布 TEB 调试反馈话题（调参可开，常规运行可关）
-  publish_feedback: false
+  publish_feedback: true
 
   # ========================= 机器人运动学约束 =========================
   # 最大前进线速度，m/s
