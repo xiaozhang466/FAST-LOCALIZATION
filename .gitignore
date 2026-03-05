@@ -17,6 +17,7 @@ __pycache__/
 *.log
 Log/
 logs/
+bags/
 
 # Backup files
 *~

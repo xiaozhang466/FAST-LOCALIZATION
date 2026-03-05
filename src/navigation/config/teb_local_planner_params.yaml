@@ -8,7 +8,7 @@ TebLocalPlannerROS:
   # 自动调整轨迹时间分辨率（true 时会围绕 dt_ref 自适应增减轨迹点）
   teb_autosize: true
   # 相邻轨迹位姿的目标时间间隔，单位秒（越小越细腻，但计算更重）
-  dt_ref: 0.3
+  dt_ref: 0.2
   # 时间间隔滞回带，避免频繁增删轨迹点导致抖动
   dt_hysteresis: 0.1
   # 轨迹最大采样点数量上限（防止异常情况下轨迹过长）
@@ -16,9 +16,9 @@ TebLocalPlannerROS:
   # 用全局路径方向覆盖局部轨迹朝向（更贴全局路，但可能降低局部灵活性）
   global_plan_overwrite_orientation: true
   # 允许以“倒车”方式初始化轨迹（目标在后方时更容易起步）
-  allow_init_with_backwards_motion: true
+  allow_init_with_backwards_motion: false
   # 从全局路径截取给 TEB 的前瞻长度，单位米（减小可提升局部响应）
-  max_global_plan_lookahead_dist: 3.0
+  max_global_plan_lookahead_dist: 1.5
   # 目标点变化超过该距离时强制重建 TEB 轨迹，单位米
   force_reinit_new_goal_dist: 1.0
   # 可行性检查使用的前 N 个轨迹位姿数（主要检查碰撞/运动学可行）
@@ -28,17 +28,17 @@ TebLocalPlannerROS:
 
   # ========================= 机器人运动学约束 =========================
   # 最大前进线速度，m/s
-  max_vel_x: 0.4
+  max_vel_x: 0.25
   # 最大后退线速度，m/s（适当小于前进速度通常更稳）
-  max_vel_x_backwards: 0.3
+  max_vel_x_backwards: 0.2
   # 最大角速度，rad/s
-  max_vel_theta: 1.0
+  max_vel_theta: 0.55
   # 线加速度限制，m/s^2（越小越平顺，越大越激进）
-  acc_lim_x: 1.5
+  acc_lim_x: 0.8
   # 角加速度限制，rad/s^2
-  acc_lim_theta: 2.0
+  acc_lim_theta: 0.8
   # 最小转弯半径，m；差速/原地转向机器人通常设 0
-  min_turning_radius: 0.0
+  min_turning_radius: 0.48
   # 轴距，m；仅在类汽车模型或使用转向角时更关键
   wheelbase: 0.494
   # true 表示输出前轮转角命令；false 表示输出角速度（Twist.angular.z）
@@ -97,7 +97,7 @@ TebLocalPlannerROS:
   # 前进偏好权重（越大越抑制倒车，0 表示不偏好）
   weight_kinematics_forward_drive: 0.2
   # 最小转弯半径约束权重（差速底盘设半径 0 时影响较小）
-  weight_kinematics_turning_radius: 1.0
+  weight_kinematics_turning_radius: 30.0
   # 最短时间目标权重（越大越追求快到达）
   weight_optimaltime: 1.0
   # 障碍物代价权重（越大越远离障碍）
