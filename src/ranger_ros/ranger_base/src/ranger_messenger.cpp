@@ -186,7 +186,8 @@ void RangerROSMessenger::SetupSubscription() {
 
   // subscriber
   motion_cmd_sub_ = nh_->subscribe<geometry_msgs::Twist>(
-      "/cmd_vel", 5, &RangerROSMessenger::TwistCmdCallback, this);
+      "/cmd_vel", 1, &RangerROSMessenger::TwistCmdCallback, this,
+      ros::TransportHints().tcpNoDelay());
   light_cmd_subscriber_ = nh_->subscribe<ranger_msgs::RangerLightCmd>(
       "/ranger_light_control", 5, &RangerROSMessenger::LightCmdCallback, this);
 
