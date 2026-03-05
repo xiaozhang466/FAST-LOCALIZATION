@@ -25,10 +25,10 @@
   <arg name="map_odom_time_offset" default="0.03"/>
   <arg name="enable_cmd_vel_filter" default="true"/>
   <arg name="cmd_vel_delay_comp_enable" default="true"/>
-  <arg name="cmd_vel_delay_comp_tau_linear" default="0.14"/>
-  <arg name="cmd_vel_delay_comp_tau_angular" default="0.14"/>
-  <arg name="cmd_vel_delay_comp_max_linear_boost" default="0.20"/>
-  <arg name="cmd_vel_delay_comp_max_angular_boost" default="0.50"/>
+  <arg name="cmd_vel_delay_comp_tau_linear" default="0.08"/>
+  <arg name="cmd_vel_delay_comp_tau_angular" default="0.00"/>
+  <arg name="cmd_vel_delay_comp_max_linear_boost" default="0.12"/>
+  <arg name="cmd_vel_delay_comp_max_angular_boost" default="0.00"/>
 
   <!-- Static TF: map -> camera_init -->
   <group if="$(arg publish_static_tf)">

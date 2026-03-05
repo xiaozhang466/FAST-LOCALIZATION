@@ -31,12 +31,12 @@ TebLocalPlannerROS:
   max_vel_x: 0.25
   # 最大后退线速度，m/s（适当小于前进速度通常更稳）
   max_vel_x_backwards: 0.2
-  # 最大角速度，rad/s
-  max_vel_theta: 0.55
+  # 最大角速度，rad/s（收紧，降低角向摆动）
+  max_vel_theta: 0.40
   # 线加速度限制，m/s^2（越小越平顺，越大越激进）
   acc_lim_x: 0.8
-  # 角加速度限制，rad/s^2
-  acc_lim_theta: 0.8
+  # 角加速度限制，rad/s^2（收紧，降低角向激进度）
+  acc_lim_theta: 0.50
   # 最小转弯半径，m；差速/原地转向机器人通常设 0
   min_turning_radius: 0.48
   # 轴距，m；仅在类汽车模型或使用转向角时更关键
@@ -86,12 +86,12 @@ TebLocalPlannerROS:
   penalty_epsilon: 0.1
   # 速度上限约束权重（越大越不允许超速）
   weight_max_vel_x: 2.0
-  # 角速度上限约束权重
-  weight_max_vel_theta: 1.0
+  # 角速度上限约束权重（提高，抑制角速度过大）
+  weight_max_vel_theta: 3.0
   # 线加速度上限约束权重
   weight_acc_lim_x: 1.0
-  # 角加速度上限约束权重
-  weight_acc_lim_theta: 1.0
+  # 角加速度上限约束权重（提高，抑制角速度突变）
+  weight_acc_lim_theta: 2.5
   # 非完整约束（差速不可侧移）权重；大值可强约束运动学可行性
   weight_kinematics_nh: 1000.0
   # 前进偏好权重（越大越抑制倒车，0 表示不偏好）
