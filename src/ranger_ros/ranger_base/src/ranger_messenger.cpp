@@ -88,6 +88,7 @@ void RangerROSMessenger::LoadParameters() {
   nh_->param<std::string>("odom_topic_name", odom_topic_name_,
                           std::string("odom"));
   nh_->param<bool>("publish_odom_tf", publish_odom_tf_, false);
+  nh_->param<bool>("enable_spinning_mode", enable_spinning_mode_, true);
   nh_->param<double>("spin_switch_linear_threshold",
                      spin_switch_linear_threshold_, 0.05);
   nh_->param<double>("spin_switch_angular_threshold",
@@ -97,11 +98,11 @@ void RangerROSMessenger::LoadParameters() {
       "Successfully loaded the following parameters: \n port_name: %s\n "
       "robot_model: %s\n odom_frame: %s\n base_frame: %s\n "
       "update_rate: %d\n odom_topic_name: %s\n "
-      "publish_odom_tf: %d\n spin_switch_linear_threshold: %.3f\n "
+      "publish_odom_tf: %d\n enable_spinning_mode: %d\n spin_switch_linear_threshold: %.3f\n "
       "spin_switch_angular_threshold: %.3f\n",
       port_name_.c_str(), robot_model_.c_str(), odom_frame_.c_str(),
       base_frame_.c_str(), update_rate_, odom_topic_name_.c_str(),
-      publish_odom_tf_, spin_switch_linear_threshold_,
+      publish_odom_tf_, enable_spinning_mode_, spin_switch_linear_threshold_,
       spin_switch_angular_threshold_);
 
   // load robot parameters
@@ -489,7 +490,7 @@ void RangerROSMessenger::TwistCmdCallback(
         abs_linear_x <= spin_switch_linear_threshold_ &&
         abs_angular_z >= spin_switch_angular_threshold_;
     // Use minimum turn radius to switch between dual ackerman and spinning mode
-    if (prefer_spinning || radius < robot_params_.min_turn_radius) {
+    if (enable_spinning_mode_ && (prefer_spinning || radius < robot_params_.min_turn_radius)) {
       motion_mode_ = MotionState::MOTION_MODE_SPINNING;
       robot_->SetMotionMode(MotionState::MOTION_MODE_SPINNING);
     } else {

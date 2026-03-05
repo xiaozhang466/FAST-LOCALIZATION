@@ -14,6 +14,7 @@
   <arg name="chassis_base_frame" default="body"/>
   <arg name="chassis_odom_topic" default="/ranger_odom"/>
   <arg name="chassis_publish_odom_tf" default="true"/>
+  <arg name="enable_spinning_mode" default="false"/>
   <arg name="chassis_spin_switch_linear_threshold" default="0.01"/>
   <arg name="chassis_spin_switch_angular_threshold" default="0.60"/>
   <arg name="publish_body_to_base_tf" default="true"/>
@@ -50,6 +51,7 @@
       <arg name="base_frame" value="$(arg chassis_base_frame)"/>
       <arg name="odom_topic_name" value="$(arg chassis_odom_topic)"/>
       <arg name="publish_odom_tf" value="$(arg chassis_publish_odom_tf)"/>
+      <arg name="enable_spinning_mode" value="$(arg enable_spinning_mode)"/>
       <arg name="spin_switch_linear_threshold" value="$(arg chassis_spin_switch_linear_threshold)"/>
       <arg name="spin_switch_angular_threshold" value="$(arg chassis_spin_switch_angular_threshold)"/>
     </include>

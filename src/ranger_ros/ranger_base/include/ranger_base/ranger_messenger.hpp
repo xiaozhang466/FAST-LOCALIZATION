@@ -87,6 +87,7 @@ class RangerROSMessenger {
   std::string odom_topic_name_;
   int update_rate_;
   bool publish_odom_tf_;
+  bool enable_spinning_mode_;
   double spin_switch_linear_threshold_;
   double spin_switch_angular_threshold_;
 
