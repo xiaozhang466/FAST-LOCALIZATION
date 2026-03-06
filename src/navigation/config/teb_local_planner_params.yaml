@@ -13,16 +13,12 @@ TebLocalPlannerROS:
   dt_hysteresis: 0.1
   # 轨迹最大采样点数量上限（防止异常情况下轨迹过长）
   max_samples: 500
-  # 不强制覆盖全局路径朝向，避免因朝向微抖导致角速度频繁正负切换
-  global_plan_overwrite_orientation: false
+  # 使用全局路径方向约束局部轨迹，抑制长距离单侧偏移
+  global_plan_overwrite_orientation: true
   # 允许以“倒车”方式初始化轨迹（目标在后方时更容易起步）
   allow_init_with_backwards_motion: false
   # 从全局路径截取给 TEB 的前瞻长度，单位米（略缩短以增强跟线纠偏）
   max_global_plan_lookahead_dist: 1.8
-  # 从全局路径提取 via-point 的间隔，单位米（>0 启用 via-point 跟踪）
-  global_plan_viapoint_sep: 0.35
-  # 是否按顺序跟踪 via-point（建议开启，防止局部跳点）
-  via_points_ordered: true
   # 目标点变化超过该距离时强制重建 TEB 轨迹，单位米
   force_reinit_new_goal_dist: 1.0
   # 可行性检查使用的前 N 个轨迹位姿数（主要检查碰撞/运动学可行）
@@ -106,8 +102,6 @@ TebLocalPlannerROS:
   weight_optimaltime: 0.4
   # 障碍物代价权重（越大越远离障碍）
   weight_obstacle: 50.0
-  # via-point 约束权重（提高后更强调贴合全局路径位置，而非频繁调朝向）
-  weight_viapoint: 8.0
 
   # ========================= 同伦类路径 =========================
   # 是否启用多同伦类并行规划（false 更稳定易调；true 可绕障更灵活但更复杂）
