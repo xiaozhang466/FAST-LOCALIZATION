@@ -40,6 +40,8 @@ class MapOdomBroadcaster:
         self.publish_rate = float(rospy.get_param("~publish_rate", 100.0))
         self.msg_timeout = float(rospy.get_param("~msg_timeout", 0.5))
         self.time_offset = float(rospy.get_param("~time_offset", 0.03))
+        # Navigation is 2D, so publish planar map->odom by default.
+        self.force_2d = bool(rospy.get_param("~force_2d", True))
 
         self._lock = threading.Lock()
         self._global_odom = None
@@ -58,12 +60,14 @@ class MapOdomBroadcaster:
         self._timer = rospy.Timer(rospy.Duration(period), self._on_timer)
 
         rospy.loginfo(
-            "map_odom_broadcaster started: map_frame=%s odom_frame=%s global_odom=%s local_odom=%s time_offset=%.3f",
+            "map_odom_broadcaster started: map_frame=%s odom_frame=%s global_odom=%s local_odom=%s "
+            "time_offset=%.3f force_2d=%s",
             self.map_frame,
             self.odom_frame,
             self.global_odom_topic,
             self.local_odom_topic,
             self.time_offset,
+            str(self.force_2d),
         )
 
     def _global_odom_cb(self, msg: Odometry):
@@ -117,6 +121,11 @@ class MapOdomBroadcaster:
 
         trans = tft.translation_from_matrix(t_map_odom)
         quat = tft.quaternion_from_matrix(t_map_odom)
+        if self.force_2d:
+            # Keep only planar motion for navigation TF to avoid z/roll/pitch jitter.
+            _, _, yaw = tft.euler_from_quaternion(quat)
+            trans = np.array([trans[0], trans[1], 0.0], dtype=float)
+            quat = tft.quaternion_from_euler(0.0, 0.0, yaw)
 
         tf_msg = TransformStamped()
         tf_msg.header.stamp = now + rospy.Duration.from_sec(self.time_offset)
