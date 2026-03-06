@@ -19,7 +19,7 @@ oscillation_distance: 0.2        # 震荡距离阈值 (米)，移动距离小于
 
 # ============================ NavFn 全局规划器参数 ============================
 NavfnROS:
-  allow_unknown: true            # 允许规划穿过未知区域
+  allow_unknown: false            # 允许规划穿过未知区域
 
 # ============================ DWA 局部规划器参数 ============================
 DWAPlannerROS:
@@ -27,7 +27,7 @@ DWAPlannerROS:
   holonomic_robot: false         # 非全向机器人 (差速底盘)，只能前进和原地旋转
   
   # ---------- 线速度约束 (m/s) ----------
-  max_vel_x: 0.8                 # 最大前进速度
+  max_vel_x: 0.4                 # 最大前进速度
   min_vel_x: 0.0                 # 允许停车和原地旋转
   min_vel_trans: 0.0             # 最小平移速度，0 允许纯原地旋转
   max_vel_y: 0.0                 # 最大侧向速度 (差速底盘为 0)
