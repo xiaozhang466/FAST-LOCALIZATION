@@ -29,6 +29,9 @@
   <arg name="cmd_vel_delay_comp_tau_angular" default="0.00"/>
   <arg name="cmd_vel_delay_comp_max_linear_boost" default="0.12"/>
   <arg name="cmd_vel_delay_comp_max_angular_boost" default="0.00"/>
+  <arg name="cmd_vel_angular_lpf_enable" default="true"/>
+  <arg name="cmd_vel_angular_lpf_alpha" default="0.35"/>
+  <arg name="cmd_vel_angular_slew_rate" default="1.0"/>
 
   <!-- Static TF: map -> camera_init -->
   <group if="$(arg publish_static_tf)">
@@ -103,6 +106,9 @@
     <param name="delay_comp_tau_angular" value="$(arg cmd_vel_delay_comp_tau_angular)"/>
     <param name="delay_comp_max_linear_boost" value="$(arg cmd_vel_delay_comp_max_linear_boost)"/>
     <param name="delay_comp_max_angular_boost" value="$(arg cmd_vel_delay_comp_max_angular_boost)"/>
+    <param name="angular_lpf_enable" value="$(arg cmd_vel_angular_lpf_enable)"/>
+    <param name="angular_lpf_alpha" value="$(arg cmd_vel_angular_lpf_alpha)"/>
+    <param name="angular_slew_rate" value="$(arg cmd_vel_angular_slew_rate)"/>
   </node>
 
   <!-- RViz for monitoring -->

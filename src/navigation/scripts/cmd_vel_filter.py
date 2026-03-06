@@ -18,6 +18,10 @@ class CmdVelFilter:
         self.delay_comp_max_dt = rospy.get_param("~delay_comp_max_dt", 0.2)
         self.delay_comp_max_linear_boost = rospy.get_param("~delay_comp_max_linear_boost", 0.20)
         self.delay_comp_max_angular_boost = rospy.get_param("~delay_comp_max_angular_boost", 0.50)
+        # Angular smoothing: low-pass + slew-rate limit
+        self.angular_lpf_enable = rospy.get_param("~angular_lpf_enable", True)
+        self.angular_lpf_alpha = rospy.get_param("~angular_lpf_alpha", 0.35)
+        self.angular_slew_rate = rospy.get_param("~angular_slew_rate", 1.0)
 
         input_topic = rospy.get_param("~input_topic", "/cmd_vel_raw")
         output_topic = rospy.get_param("~output_topic", "/cmd_vel")
@@ -31,12 +35,18 @@ class CmdVelFilter:
         self.prev_target_linear_x = 0.0
         self.prev_target_angular_z = 0.0
         self.last_input_time = None
+        self.prev_output_angular_z = 0.0
+        self.last_output_time = None
 
         rospy.loginfo(
-            "cmd_vel_filter started: delay_comp_enable=%s tau_linear=%.3f tau_angular=%.3f",
+            "cmd_vel_filter started: delay_comp_enable=%s tau_linear=%.3f tau_angular=%.3f "
+            "angular_lpf_enable=%s alpha=%.2f angular_slew_rate=%.2f",
             str(self.delay_comp_enable),
             self.delay_comp_tau_linear,
             self.delay_comp_tau_angular,
+            str(self.angular_lpf_enable),
+            self.angular_lpf_alpha,
+            self.angular_slew_rate,
         )
 
     def _delay_compensate(self, target, prev_target, dt, tau, max_boost):
@@ -49,29 +59,45 @@ class CmdVelFilter:
 
     def cb(self, msg: Twist):
         now = rospy.Time.now()
-        dt = None
+        dt_in = None
         if self.last_input_time is not None:
-            dt = (now - self.last_input_time).to_sec()
+            dt_in = (now - self.last_input_time).to_sec()
 
         target_linear_x = msg.linear.x
         target_angular_z = msg.angular.z
 
         # Delay compensation using command derivative
-        if self.delay_comp_enable and dt is not None:
+        if self.delay_comp_enable and dt_in is not None:
             target_linear_x = self._delay_compensate(
                 target_linear_x,
                 self.prev_target_linear_x,
-                dt,
+                dt_in,
                 self.delay_comp_tau_linear,
                 self.delay_comp_max_linear_boost,
             )
             target_angular_z = self._delay_compensate(
                 target_angular_z,
                 self.prev_target_angular_z,
-                dt,
+                dt_in,
                 self.delay_comp_tau_angular,
                 self.delay_comp_max_angular_boost,
             )
+
+        # Low-pass filter on angular command to reduce oscillatory wheel steering.
+        if self.angular_lpf_enable and self.last_output_time is not None:
+            alpha = max(0.0, min(1.0, self.angular_lpf_alpha))
+            target_angular_z = alpha * target_angular_z + (1.0 - alpha) * self.prev_output_angular_z
+
+        # Slew-rate limit on angular command: limit |dw/dt|.
+        if self.last_output_time is not None:
+            dt_out = (now - self.last_output_time).to_sec()
+            if dt_out > 1e-4 and self.angular_slew_rate > 0.0:
+                max_delta = self.angular_slew_rate * dt_out
+                delta = target_angular_z - self.prev_output_angular_z
+                if delta > max_delta:
+                    target_angular_z = self.prev_output_angular_z + max_delta
+                elif delta < -max_delta:
+                    target_angular_z = self.prev_output_angular_z - max_delta
 
         out = Twist()
         out.linear.x = target_linear_x
@@ -86,6 +112,8 @@ class CmdVelFilter:
         self.prev_target_linear_x = msg.linear.x
         self.prev_target_angular_z = msg.angular.z
         self.last_input_time = now
+        self.prev_output_angular_z = target_angular_z
+        self.last_output_time = now
 
 
 def main():
