@@ -7,8 +7,8 @@ TebLocalPlannerROS:
   # ========================= 时间离散/轨迹初始化 =========================
   # 自动调整轨迹时间分辨率（true 时会围绕 dt_ref 自适应增减轨迹点）
   teb_autosize: true
-  # 相邻轨迹位姿的目标时间间隔，单位秒（向 DWA 风格靠拢，降低重规划抖动）
-  dt_ref: 0.30
+  # 相邻轨迹位姿的目标时间间隔，单位秒（继续增大，降低重规划抖动）
+  dt_ref: 0.35
   # 时间间隔滞回带，避免频繁增删轨迹点导致抖动
   dt_hysteresis: 0.1
   # 轨迹最大采样点数量上限（防止异常情况下轨迹过长）
@@ -31,12 +31,12 @@ TebLocalPlannerROS:
   max_vel_x: 0.22
   # 最大后退线速度，m/s（进一步降低，减少倒车解）
   max_vel_x_backwards: 0.08
-  # 最大角速度，rad/s（略提高，增强掉头与纠偏果断性）
-  max_vel_theta: 0.50
+  # 最大角速度，rad/s（收紧，减少过冲导致的来回修正）
+  max_vel_theta: 0.40
   # 线加速度限制，m/s^2（越小越平顺，越大越激进）
   acc_lim_x: 0.8
-  # 角加速度限制，rad/s^2（中等，兼顾响应与平顺）
-  acc_lim_theta: 0.40
+  # 角加速度限制，rad/s^2（收紧，降低角向振荡）
+  acc_lim_theta: 0.28
   # 最小转弯半径，m（四轮四转可原地转向，测试放开为 0）
   min_turning_radius: 0.0
   # 轴距，m；仅在类汽车模型或使用转向角时更关键
@@ -98,8 +98,8 @@ TebLocalPlannerROS:
   weight_kinematics_forward_drive: 6.0
   # 最小转弯半径约束权重（最小化，避免干扰四轮四转原地能力）
   weight_kinematics_turning_radius: 1.0
-  # 最短时间目标权重（再降，减小“急于修正”导致的左右摆）
-  weight_optimaltime: 0.25
+  # 最短时间目标权重（继续降低，优先平顺）
+  weight_optimaltime: 0.15
   # 障碍物代价权重（越大越远离障碍）
   weight_obstacle: 50.0
 
