@@ -7,8 +7,8 @@ TebLocalPlannerROS:
   # ========================= 时间离散/轨迹初始化 =========================
   # 自动调整轨迹时间分辨率（true 时会围绕 dt_ref 自适应增减轨迹点）
   teb_autosize: true
-  # 相邻轨迹位姿的目标时间间隔，单位秒（略增大以抑制高频抖动）
-  dt_ref: 0.25
+  # 相邻轨迹位姿的目标时间间隔，单位秒（向 DWA 风格靠拢，降低重规划抖动）
+  dt_ref: 0.30
   # 时间间隔滞回带，避免频繁增删轨迹点导致抖动
   dt_hysteresis: 0.1
   # 轨迹最大采样点数量上限（防止异常情况下轨迹过长）
@@ -29,14 +29,14 @@ TebLocalPlannerROS:
   # ========================= 机器人运动学约束 =========================
   # 最大前进线速度，m/s（略降，降低耦合振荡）
   max_vel_x: 0.22
-  # 最大后退线速度，m/s（保持较小但需大于 penalty_epsilon，避免TEB约束异常）
-  max_vel_x_backwards: 0.12
-  # 最大角速度，rad/s（保留足够原地转向能力，同时抑制过冲）
-  max_vel_theta: 0.45
+  # 最大后退线速度，m/s（进一步降低，减少倒车解）
+  max_vel_x_backwards: 0.08
+  # 最大角速度，rad/s（略提高，增强掉头与纠偏果断性）
+  max_vel_theta: 0.50
   # 线加速度限制，m/s^2（越小越平顺，越大越激进）
   acc_lim_x: 0.8
-  # 角加速度限制，rad/s^2（收紧，减少左右来回修正）
-  acc_lim_theta: 0.35
+  # 角加速度限制，rad/s^2（中等，兼顾响应与平顺）
+  acc_lim_theta: 0.40
   # 最小转弯半径，m（四轮四转可原地转向，测试放开为 0）
   min_turning_radius: 0.0
   # 轴距，m；仅在类汽车模型或使用转向角时更关键
@@ -54,8 +54,8 @@ TebLocalPlannerROS:
   # ========================= 到点判定 =========================
   # 位置到达容差，m
   xy_goal_tolerance: 0.2
-  # 朝向到达容差，rad（0.35 rad 约 20 度）
-  yaw_goal_tolerance: 0.35
+  # 朝向到达容差，rad（向 DWA 风格靠拢，减少终点附近频繁微调）
+  yaw_goal_tolerance: 0.40
   # 到达目标后是否允许保留非零速度（false 表示必须刹停）
   free_goal_vel: false
   # 是否尽量走完整条全局路径到终点（true 通常更保守）
@@ -74,32 +74,32 @@ TebLocalPlannerROS:
   obstacle_poses_affected: 30
 
   # ========================= 优化器参数/权重 =========================
-  # 每次外循环中的内层优化迭代次数（每轮细化强度）
-  no_inner_iterations: 5
-  # 外层“重线性化+再优化”次数（整体收敛能力）
-  no_outer_iterations: 4
+  # 每次外循环中的内层优化迭代次数（略降，减少高频微调）
+  no_inner_iterations: 4
+  # 外层“重线性化+再优化”次数（略降，降低过拟合当前误差）
+  no_outer_iterations: 3
   # 是否开启优化（关闭后基本不具备 TEB 的核心能力）
   optimization_activate: true
   # 是否打印详细优化日志（调参时可开启）
   optimization_verbose: false
-  # 软约束惩罚平滑项（避免硬拐点，常取小正数）
-  penalty_epsilon: 0.1
+  # 软约束惩罚平滑项（降低，允许更小后退上限而不触发负边界）
+  penalty_epsilon: 0.02
   # 速度上限约束权重（越大越不允许超速）
   weight_max_vel_x: 2.0
-  # 角速度上限约束权重（适中，平衡转向能力与平顺性）
-  weight_max_vel_theta: 3.0
+  # 角速度上限约束权重（降低，减少对转向能力的抑制）
+  weight_max_vel_theta: 2.0
   # 线加速度上限约束权重
   weight_acc_lim_x: 1.0
-  # 角加速度上限约束权重（适中，提高抑振能力）
-  weight_acc_lim_theta: 2.5
+  # 角加速度上限约束权重（适中，避免角向过度钝化）
+  weight_acc_lim_theta: 2.0
   # 非完整约束（差速不可侧移）权重；大值可强约束运动学可行性
   weight_kinematics_nh: 1000.0
-  # 前进偏好权重（提高，抑制倒车解）
-  weight_kinematics_forward_drive: 3.0
-  # 最小转弯半径约束权重（降低，避免把轨迹硬推成大半径弧线）
-  weight_kinematics_turning_radius: 5.0
-  # 最短时间目标权重（降低，减少激进纠偏）
-  weight_optimaltime: 0.3
+  # 前进偏好权重（进一步提高，靠近 DWA 常见前进优先行为）
+  weight_kinematics_forward_drive: 6.0
+  # 最小转弯半径约束权重（最小化，避免干扰四轮四转原地能力）
+  weight_kinematics_turning_radius: 1.0
+  # 最短时间目标权重（再降，减小“急于修正”导致的左右摆）
+  weight_optimaltime: 0.25
   # 障碍物代价权重（越大越远离障碍）
   weight_obstacle: 50.0
 
