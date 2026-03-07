@@ -31,14 +31,14 @@ TebLocalPlannerROS:
   max_vel_x: 0.22
   # 最大后退线速度，m/s（适当小于前进速度通常更稳）
   max_vel_x_backwards: 0.2
-  # 最大角速度，rad/s（小幅放开，增强横向偏移纠正能力）
-  max_vel_theta: 0.30
+  # 最大角速度，rad/s（提高，允许更小转弯半径与必要的原地转向）
+  max_vel_theta: 0.55
   # 线加速度限制，m/s^2（越小越平顺，越大越激进）
   acc_lim_x: 0.8
-  # 角加速度限制，rad/s^2（小幅放开，提升角向纠偏响应）
-  acc_lim_theta: 0.30
-  # 最小转弯半径，m（小幅回调，允许必要的纠偏曲率）
-  min_turning_radius: 0.50
+  # 角加速度限制，rad/s^2（适度提高，增强转向建立速度）
+  acc_lim_theta: 0.45
+  # 最小转弯半径，m（四轮四转可原地转向，测试放开为 0）
+  min_turning_radius: 0.0
   # 轴距，m；仅在类汽车模型或使用转向角时更关键
   wheelbase: 0.494
   # true 表示输出前轮转角命令；false 表示输出角速度（Twist.angular.z）
@@ -86,18 +86,18 @@ TebLocalPlannerROS:
   penalty_epsilon: 0.1
   # 速度上限约束权重（越大越不允许超速）
   weight_max_vel_x: 2.0
-  # 角速度上限约束权重（继续提高，抑制角速度过大）
-  weight_max_vel_theta: 5.0
+  # 角速度上限约束权重（降低，避免过度抑制转向能力）
+  weight_max_vel_theta: 2.5
   # 线加速度上限约束权重
   weight_acc_lim_x: 1.0
-  # 角加速度上限约束权重（继续提高，抑制角速度突变）
-  weight_acc_lim_theta: 4.0
+  # 角加速度上限约束权重（降低，避免过度抑制转向建立）
+  weight_acc_lim_theta: 2.0
   # 非完整约束（差速不可侧移）权重；大值可强约束运动学可行性
   weight_kinematics_nh: 1000.0
   # 前进偏好权重（适中，避免过强前进偏好导致纠偏不足）
   weight_kinematics_forward_drive: 0.6
-  # 最小转弯半径约束权重（提高，降低急促左右摆）
-  weight_kinematics_turning_radius: 60.0
+  # 最小转弯半径约束权重（降低，避免把轨迹硬推成大半径弧线）
+  weight_kinematics_turning_radius: 5.0
   # 最短时间目标权重（适中，兼顾平顺与跟线）
   weight_optimaltime: 0.4
   # 障碍物代价权重（越大越远离障碍）
