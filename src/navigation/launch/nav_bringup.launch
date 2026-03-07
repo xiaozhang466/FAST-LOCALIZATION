@@ -15,8 +15,8 @@
   <arg name="chassis_odom_topic" default="/ranger_odom"/>
   <arg name="chassis_publish_odom_tf" default="true"/>
   <arg name="enable_spinning_mode" default="true"/>
-  <arg name="chassis_spin_switch_linear_threshold" default="0.01"/>
-  <arg name="chassis_spin_switch_angular_threshold" default="0.60"/>
+  <arg name="chassis_spin_switch_linear_threshold" default="0.05"/>
+  <arg name="chassis_spin_switch_angular_threshold" default="0.25"/>
   <arg name="publish_body_to_base_tf" default="true"/>
   <arg name="enable_map_odom_tf" default="true"/>
   <arg name="global_odom_topic" default="/Odometry"/>
