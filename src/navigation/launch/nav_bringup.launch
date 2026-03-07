@@ -14,7 +14,7 @@
   <arg name="chassis_base_frame" default="body"/>
   <arg name="chassis_odom_topic" default="/ranger_odom"/>
   <arg name="chassis_publish_odom_tf" default="true"/>
-  <arg name="enable_spinning_mode" default="false"/>
+  <arg name="enable_spinning_mode" default="true"/>
   <arg name="chassis_spin_switch_linear_threshold" default="0.01"/>
   <arg name="chassis_spin_switch_angular_threshold" default="0.60"/>
   <arg name="publish_body_to_base_tf" default="true"/>
@@ -32,6 +32,11 @@
   <arg name="cmd_vel_angular_lpf_enable" default="true"/>
   <arg name="cmd_vel_angular_lpf_alpha" default="0.35"/>
   <arg name="cmd_vel_angular_slew_rate" default="1.0"/>
+  <arg name="cmd_vel_angular_damping_enable" default="true"/>
+  <arg name="cmd_vel_angular_damping_topic" default="/ranger_odom"/>
+  <arg name="cmd_vel_angular_damping_gain" default="0.35"/>
+  <arg name="cmd_vel_angular_damping_max" default="0.12"/>
+  <arg name="cmd_vel_angular_damping_timeout" default="0.2"/>
 
   <!-- Static TF: map -> camera_init -->
   <group if="$(arg publish_static_tf)">
@@ -109,6 +114,11 @@
     <param name="angular_lpf_enable" value="$(arg cmd_vel_angular_lpf_enable)"/>
     <param name="angular_lpf_alpha" value="$(arg cmd_vel_angular_lpf_alpha)"/>
     <param name="angular_slew_rate" value="$(arg cmd_vel_angular_slew_rate)"/>
+    <param name="angular_damping_enable" value="$(arg cmd_vel_angular_damping_enable)"/>
+    <param name="angular_damping_topic" value="$(arg cmd_vel_angular_damping_topic)"/>
+    <param name="angular_damping_gain" value="$(arg cmd_vel_angular_damping_gain)"/>
+    <param name="angular_damping_max" value="$(arg cmd_vel_angular_damping_max)"/>
+    <param name="angular_damping_timeout" value="$(arg cmd_vel_angular_damping_timeout)"/>
   </node>
 
   <!-- RViz for monitoring -->
