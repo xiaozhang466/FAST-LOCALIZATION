@@ -1,0 +1,6 @@
+fixed_left_width: 0.9111111111111112
+fixed_right_width: 0.9111111111111111
+fixed_radius: 0.9111111111111112
+fixed_radius_mode: mean
+quantile: 0.65
+bounds: [0.5, 2.0]
