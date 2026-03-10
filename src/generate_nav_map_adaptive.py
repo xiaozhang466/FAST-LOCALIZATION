@@ -28,9 +28,9 @@ from putn_traversability import (
 )
 
 
-DEFAULT_MAP_DIR = "/home/ros/ZMG/fast_localization_ws/src/FAST-LOCALIZATION/map"
-DEFAULT_GLOBAL_PCD = "/home/ros/ZMG/fast_localization_ws/src/global_map/global_map.pcd"
-DEFAULT_OUTPUT_DIR = "/home/ros/ZMG/fast_localization_ws/src/global_map/adaptive_debug"
+DEFAULT_MAP_DIR = "/home/ros/ZMG/fast_localization_ws/src/FAST-LOCALIZATION/map_test"
+DEFAULT_GLOBAL_PCD = "/home/ros/ZMG/fast_localization_ws/src/global_map/test/global_map.pcd"
+DEFAULT_OUTPUT_DIR = "/home/ros/ZMG/fast_localization_ws/src/global_map/test"
 
 NAV_MAP_PGM = "nav_map_adaptive.pgm"
 NAV_MAP_YAML = "nav_map_adaptive.yaml"

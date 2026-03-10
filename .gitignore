@@ -28,3 +28,13 @@ bags/
 # OS
 .DS_Store
 Thumbs.db
+
+# Map data
+src/FAST-LOCALIZATION/map/*
+!src/FAST-LOCALIZATION/map/.gitkeep
+src/FAST-LOCALIZATION/map_test/*
+!src/FAST-LOCALIZATION/map_test/.gitkeep
+src/global_map/adaptive_debug/*
+!src/global_map/adaptive_debug/.gitkeep
+src/global_map/test/*
+!src/global_map/test/.gitkeep
